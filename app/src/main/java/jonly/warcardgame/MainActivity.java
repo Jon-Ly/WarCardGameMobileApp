@@ -3,17 +3,13 @@ package jonly.warcardgame;
 import android.support.v7.app.AppCompatActivity;
 
 import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import java.util.Random;
-
-import jonly.warcardgame.R;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -32,6 +28,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+    }
+
+    @Override
+    public void onAttachedToWindow(){
+        super.onAttachedToWindow();
 
         cards = new ImageView[5];
         card_drawable_ids = new int[5];
@@ -116,7 +117,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             if(!current_chatter) {
-                message = "Your name: " + message;
+                message = getIntent().getExtras().getString("USERNAME") + ": " + message;
                 current_chatter = true;
             }
             LinearLayout linearLayout = findViewById(R.id.chatBox);

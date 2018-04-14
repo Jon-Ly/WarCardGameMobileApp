@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="jonly.warcardgame.MainActivity">
+    tools:context="jonly.warcardgame.MainActivity"
+    android:id="@+id/main_layout">
 
     <ImageView
         android:id="@+id/card1"

@@ -9,12 +9,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.view.ViewGroup.LayoutParams;
-
-import org.w3c.dom.Text;
 
 import java.util.Random;
-import java.util.zip.Inflater;
 
 /**
  * Created by wintow on 3/30/2018.
