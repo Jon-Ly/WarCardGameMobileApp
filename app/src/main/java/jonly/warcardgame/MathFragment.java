@@ -18,7 +18,7 @@ import java.util.Random;
 
 public class MathFragment extends Fragment {
 
-    private int correctAnswer;
+    private int answer;
     private String equation;
 
     private Random rand;
@@ -26,11 +26,18 @@ public class MathFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState){
-
         rand = new Random();
-
+        answer = savedInstanceState.getInt("Answer");
+        equation = savedInstanceState.getString("Equation");
         View fragmentView = inflater.inflate(R.layout.math_fragment, container, false);
         return fragmentView;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState){
+        super.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putString("Equation", equation);
+        savedInstanceState.putInt("Answer", answer);
     }
 
     @Override
@@ -48,9 +55,9 @@ public class MathFragment extends Fragment {
                 LinearLayout answeredList = getView().findViewById(R.id.correct_ans_list);
 
                 String ans = userAnswer.getText().toString();
-                String solution = equationView.getText().toString() + " = " + correctAnswer;
+                String solution = equationView.getText().toString() + " = " + answer;
 
-                if(ans.equals(correctAnswer + "")){
+                if(ans.equals(answer + "")){
                     TextView add_solution = new TextView(getActivity());
                     add_solution.setText(solution);
                     answeredList.addView(add_solution, 0);
@@ -65,23 +72,23 @@ public class MathFragment extends Fragment {
     private void GenerateMath(){
         TextView equationView = getView().findViewById(R.id.equation);
 
-        correctAnswer = -1;
+        answer = -1;
         equation = "";
 
-        while(correctAnswer < 0){
+        while(answer < 0){
             int firstNum = rand.nextInt(16), secondNum = rand.nextInt(16);
 
             switch(rand.nextInt(3)){
                 case 0: // addition
-                    correctAnswer = firstNum + secondNum;
+                    answer = firstNum + secondNum;
                     equation = firstNum + " + " + secondNum;
                     break;
                 case 1: // subtraction
-                    correctAnswer = firstNum - secondNum;
+                    answer = firstNum - secondNum;
                     equation = firstNum + " - " + secondNum;
                     break;
                 case 2: // multiplication
-                    correctAnswer = firstNum * secondNum;
+                    answer = firstNum * secondNum;
                     equation = firstNum + " * " + secondNum;
                     break;
             }

@@ -23,7 +23,8 @@ public class LoginActivity extends AppCompatActivity{
     // Database Variables
     private GameHelperDb helperDb;
     private SQLiteDatabase db;
-    ContentValues values;
+    private ContentValues values;
+    private Cursor cursor;
     private static int currentID;
 
     @Override
@@ -57,10 +58,24 @@ public class LoginActivity extends AppCompatActivity{
 
                 if(registerCheckbox.isChecked()) {
                     //registering
+                    String query = "SELECT * FROM " + GameContract.DBEntry.TABLE_NAME;
 
-                    //TODO: Add Toast(s) for: duplicate usernames
+                    cursor = db.rawQuery(query, null);
 
-                    if(username.length() < 4){
+                    boolean duplicate = false;
+
+                    while(cursor.moveToNext()){
+                        String db_username = cursor.getString(1);
+
+                        if(username.equals(db_username)){
+                            duplicate = true;
+                            break;
+                        }
+                    }
+
+                    if(duplicate)
+                        Toast.makeText(getBaseContext(), "That username has been taken already.", Toast.LENGTH_SHORT).show();
+                    else if(username.length() < 4){
                         // 4 character long check
                         Toast.makeText(getBaseContext(), "Username must be at least 4 characters long", Toast.LENGTH_SHORT).show();
                     }else if(!Pattern.compile(".*(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[A-Za-z\\d].*").matcher(password).matches()) {
@@ -73,26 +88,37 @@ public class LoginActivity extends AppCompatActivity{
                         values.put(GameContract.DBEntry._ID, currentID++);
                         values.put(GameContract.DBEntry.COLUMN_USERNAME, username);
                         values.put(GameContract.DBEntry.COLUMN_PASSWORD, password);
-                        db.insert(GameContract.DBEntry.TABLE_NAME, null, values);
+                        db.insertWithOnConflict(GameContract.DBEntry.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_REPLACE);
                     }
                 } else{
-                    SQLiteDatabase readDb = helperDb.getReadableDatabase();
-
-                    String query = "SELECT * FROM " + GameContract.DBEntry.TABLE_NAME + " WHERE" +
-                            GameContract.DBEntry.COLUMN_USERNAME + " = " + username +
-                            " AND " + GameContract.DBEntry.COLUMN_PASSWORD + " = " + password;
+                    //Login
+                    String query = "SELECT * FROM " + GameContract.DBEntry.TABLE_NAME;
 
                     Cursor cursor = db.rawQuery(query, null);
 
-                    //TODO: Set the username to a variable.
-                    //TODO: Add Toast(s) for: wrong password, no username exists
+                    boolean successful = false, isIncorrectUsername = true;
 
-                    if(cursor.getCount() > 0) {//successful login
+                    while(cursor.moveToNext()){
+                        String db_username = cursor.getString(1);
+                        String db_password = cursor.getString(2);
+
+                        if(username.equals(db_username)){
+                            if(password.equals(db_password)){
+                                successful = true;
+                                break;
+                            }
+                            Toast.makeText(getBaseContext(), "Password is incorrect.", Toast.LENGTH_SHORT).show();
+                            isIncorrectUsername = false;
+                            break;
+                        }
+                    }
+
+                    if(!successful && isIncorrectUsername)
+                        Toast.makeText(getBaseContext(), "Your username was not found. Try registering.", Toast.LENGTH_SHORT).show();
+                    else if(successful){
                         Intent gameIntent = new Intent(LoginActivity.this, MainActivity.class);
                         gameIntent.putExtra(username, "USERNAME");
                         startActivity(gameIntent);
-                    }else{
-                        Toast.makeText(getBaseContext(), "Credientials were not found in our records.", Toast.LENGTH_SHORT).show();
                     }
                 }
             }

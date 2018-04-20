@@ -17,7 +17,7 @@ public class TableFragment extends Fragment {
                              Bundle savedInstanceState){
 
         View fragmentView = inflater.inflate(R.layout.table_fragment, container, false);
+        setRetainInstance(true);
         return fragmentView;
     }
-
 }

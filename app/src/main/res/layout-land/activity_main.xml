@@ -150,7 +150,7 @@
         android:textColor="@color/colorRed"/>
 
     <EditText
-        android:id="@+id/editText"
+        android:id="@+id/chatInput"
         android:layout_width="150dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
