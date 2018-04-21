@@ -13,42 +13,44 @@ import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static int[] card_drawable_ids;
-    private static int selected_card;
+    private int[] card_drawable_ids;
+    private int selected_card;
 
-    private static boolean current_chatter;
-    private static boolean is_tie_breaker;
+    private boolean current_chatter;
+    private boolean is_tie_breaker;
 
-    private static TableFragment tf;
+    private String chat_history;
+    private String username;
 
-    private static ImageView[] cards;
+    private ImageView[] cards;
+
+    private TableFragment tf;
+    private MathFragment mf;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        cards = new ImageView[5];
-        card_drawable_ids = new int[5];
+        cards = new ImageView[3];
+        card_drawable_ids = new int[3];
         selected_card = -1;
         current_chatter = false;
         is_tie_breaker = false;
+        chat_history = "";
+        username = getIntent().getStringExtra("USERNAME");
 
         cards[0] = findViewById(R.id.card1);
         cards[1] = findViewById(R.id.card2);
         cards[2] = findViewById(R.id.card3);
 
         if(savedInstanceState != null){
-            if(savedInstanceState.getBoolean("Is_Math_Frag")){
-                getSupportFragmentManager().beginTransaction().add(R.id.main_layout, new MathFragment()).commit();
-            }else{
-                getSupportFragmentManager().beginTransaction().add(R.id.main_layout, new TableFragment()).commit();
-            }
+            mf = (MathFragment) getSupportFragmentManager().getFragment(savedInstanceState, "Math_Fragment");
+            tf = (TableFragment) getSupportFragmentManager().getFragment(savedInstanceState, "Table_Fragment");
 
             card_drawable_ids[0] = savedInstanceState.getInt("Card_1");
             card_drawable_ids[1] = savedInstanceState.getInt("Card_2");
             card_drawable_ids[2] = savedInstanceState.getInt("Card_3");
-            card_drawable_ids[3] = savedInstanceState.getInt("Card_4");
-            card_drawable_ids[4] = savedInstanceState.getInt("Card_5");
 
             cards[0].setImageResource(savedInstanceState.getInt("Card_1"));
             cards[1].setImageResource(savedInstanceState.getInt("Card_2"));
@@ -57,8 +59,22 @@ public class MainActivity extends AppCompatActivity {
             selected_card = savedInstanceState.getInt("Selected_Card");
             current_chatter = savedInstanceState.getBoolean("Current_Chatter");
 
+            chat_history = savedInstanceState.getString("Chat_History");
+
             if(selected_card != -1)
                 cards[savedInstanceState.getInt("Selected_Card")].setBackgroundResource(R.drawable.image_border);
+
+            LinearLayout linearLayout = findViewById(R.id.chatBox);
+
+            if(linearLayout != null){
+                String[] chat_parts = chat_history.split("\n");
+                for(String s : chat_parts){
+                    TextView tv = new TextView(this);
+                    tv.setText(s);
+                    linearLayout.addView(tv, 0);
+                }
+            }
+
         }else {
             card_drawable_ids[0] = randomCard();
             card_drawable_ids[1] = randomCard();
@@ -68,9 +84,14 @@ public class MainActivity extends AppCompatActivity {
             cards[1].setImageResource(card_drawable_ids[1]);
             cards[2].setImageResource(card_drawable_ids[2]);
 
+            mf = new MathFragment();
+
             FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
             tf = new TableFragment();
             ft.add(R.id.main_layout, tf);
+            mf = new MathFragment();
+            ft.add(R.id.main_layout, mf);
+            ft.hide(mf);
             ft.commit();
         }
     }
@@ -79,32 +100,15 @@ public class MainActivity extends AppCompatActivity {
     public void onSaveInstanceState(Bundle savedInstanceState){
         super.onSaveInstanceState(savedInstanceState);
 
-        boolean is_math_frag = false;
-
         savedInstanceState.putInt("Card_1", card_drawable_ids[0]);
         savedInstanceState.putInt("Card_2", card_drawable_ids[1]);
         savedInstanceState.putInt("Card_3", card_drawable_ids[2]);
-        savedInstanceState.putInt("Card_Left", card_drawable_ids[3]);
-        savedInstanceState.putInt("Card_Right", card_drawable_ids[4]);
         savedInstanceState.putInt("Selected_Card", selected_card);
         savedInstanceState.putBoolean("Current_Chatter", current_chatter);
         savedInstanceState.putBoolean("Tie_Breaker", is_tie_breaker);
-
-        if(findViewById(R.id.math_fragment) != null)
-            is_math_frag = true;
-
-        savedInstanceState.putBoolean("Is_Math_Frag", is_math_frag);
-
-        //save chat state
-        LinearLayout linearLayout = findViewById(R.id.chatBox);
-        if(linearLayout != null) {
-            for (int i = 0; i < linearLayout.getChildCount(); i++) {
-                View view = linearLayout.getChildAt(i);
-                if (view instanceof TextView) {
-                    savedInstanceState.putString("Chat_" + i, ((TextView) view).getText().toString());
-                }
-            }
-        }
+        savedInstanceState.putString("Chat_History", chat_history);
+        getSupportFragmentManager().putFragment(savedInstanceState, "Math_Fragment", mf);
+        getSupportFragmentManager().putFragment(savedInstanceState, "Table_Fragment", tf);
     }
 
     @Override
@@ -115,11 +119,6 @@ public class MainActivity extends AppCompatActivity {
     public void selectCard(View view){
         if(!is_tie_breaker) {
             int index = -1; // index of the card selected (0-2)
-
-            if (cards[3] == null || cards[4] == null) { //fragment was not set, set the cards.
-                cards[3] = findViewById(R.id.played_card_left);
-                cards[4] = findViewById(R.id.played_card_right);
-            }
 
             for (int i = 0; i < cards.length; i++) {
                 if (cards[i].getId() == view.getId()) {
@@ -136,12 +135,10 @@ public class MainActivity extends AppCompatActivity {
             if (view.getBackground() == null) {
                 view.setBackgroundResource(R.drawable.image_border);
             } else {
-                if (card_drawable_ids[3] != 0 && card_drawable_ids[4] == 0) {
-                    cards[4].setImageResource(card_drawable_ids[index]);
-                    card_drawable_ids[4] = card_drawable_ids[index];
-                } else if (card_drawable_ids[3] == 0) {
-                    cards[3].setImageResource(card_drawable_ids[index]);
-                    card_drawable_ids[3] = card_drawable_ids[index];
+                if (tf.getLeftDrawable() == 0) {
+                    tf.setCardLeftDrawable(card_drawable_ids[index]);
+                } else if (tf.getRightDrawable() == 0) {
+                    tf.setCardRightDrawable(card_drawable_ids[index]);
                 }
                 selected_card = -1;
                 card_drawable_ids[index] = randomCard();
@@ -158,16 +155,19 @@ public class MainActivity extends AppCompatActivity {
         String message = chatInput.getText().toString().trim();
 
         if(!message.equals("")) {
-            if(message.equals("math") && !is_tie_breaker){
-                FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-                ft.replace(tf.getId(), new MathFragment());
-                ft.remove(tf);
-                ft.commit();
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            if(message.toLowerCase().equals("math") && !is_tie_breaker){
+                ft.hide(tf);
+                ft.show(mf);
                 is_tie_breaker = true;
+            }else if(message.toLowerCase().equals("table") && is_tie_breaker){
+                ft.hide(mf);
+                ft.show(tf);
+                is_tie_breaker = false;
             }
 
             if(!current_chatter) {
-                message = getIntent().getExtras().getString("USERNAME") + ": " + message;
+                message = username + ": " + message;
                 current_chatter = true;
             }
             LinearLayout linearLayout = findViewById(R.id.chatBox);
@@ -175,6 +175,8 @@ public class MainActivity extends AppCompatActivity {
             text.append(message);
             linearLayout.addView(text, 0);
             chatInput.setText("");
+            chat_history += message + "\n";
+            ft.commit();
         }
     }
 

@@ -117,7 +117,7 @@ public class LoginActivity extends AppCompatActivity{
                         Toast.makeText(getBaseContext(), "Your username was not found. Try registering.", Toast.LENGTH_SHORT).show();
                     else if(successful){
                         Intent gameIntent = new Intent(LoginActivity.this, MainActivity.class);
-                        gameIntent.putExtra(username, "USERNAME");
+                        gameIntent.putExtra("USERNAME", username);
                         startActivity(gameIntent);
                     }
                 }
