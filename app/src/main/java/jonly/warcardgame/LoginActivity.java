@@ -89,6 +89,10 @@ public class LoginActivity extends AppCompatActivity{
                         values.put(GameContract.DBEntry.COLUMN_USERNAME, username);
                         values.put(GameContract.DBEntry.COLUMN_PASSWORD, password);
                         db.insertWithOnConflict(GameContract.DBEntry.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+
+                        Intent gameIntent = new Intent(LoginActivity.this, MainActivity.class);
+                        gameIntent.putExtra("USERNAME", username);
+                        startActivity(gameIntent);
                     }
                 } else{
                     //Login

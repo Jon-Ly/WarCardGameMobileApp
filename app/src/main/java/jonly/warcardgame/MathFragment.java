@@ -22,6 +22,7 @@ public class MathFragment extends Fragment {
 
     private TextView equation_view;
     private int answer;
+    private int correct_counter;
     private String equation;
     private String correct_answers;
 
@@ -32,6 +33,7 @@ public class MathFragment extends Fragment {
                              Bundle savedInstanceState){
         rand = new Random();
         equation = getNewEquation(); // generate the new math problem/answer
+        correct_counter = 0;
         if(savedInstanceState != null) {
             answer = savedInstanceState.getInt("Answer");
             equation = savedInstanceState.getString("Equation");

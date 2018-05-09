@@ -58,16 +58,6 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/cards_remaining_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="30dp"
-        android:layout_marginTop="8dp"
-        android:text="Cards Remaining"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
         android:id="@+id/score_background"
         android:layout_width="100dp"
         android:layout_height="wrap_content"
@@ -78,24 +68,13 @@
         android:background="@color/colorBlack"/>
 
     <TextView
-        android:id="@+id/textView7"
-        android:layout_width="100dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="35dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/cards_remaining_label"
-        android:background="@color/colorBlack"/>
-
-    <TextView
         android:id="@+id/score_left"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="35dp"
-        android:text="Score"
+        android:textColor="@color/colorTeal"
         app:layout_constraintStart_toStartOf="@+id/score_background"
-        app:layout_constraintTop_toTopOf="parent"
-        android:textColor="@color/colorTeal"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/score_right"
@@ -103,32 +82,9 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="35dp"
-        android:text="Score"
         android:textColor="@color/colorRed"
         app:layout_constraintEnd_toEndOf="@+id/score_background"
         app:layout_constraintStart_toEndOf="@+id/score_left"
         app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/cards_remaining_left"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="35dp"
-        android:text="Score"
-        app:layout_constraintStart_toStartOf="@+id/textView7"
-        app:layout_constraintTop_toTopOf="parent"
-        android:textColor="@color/colorTeal"/>
-
-    <TextView
-        android:id="@+id/cards_remaining_right"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="35dp"
-        android:text="Score"
-        app:layout_constraintEnd_toEndOf="@+id/textView7"
-        app:layout_constraintStart_toEndOf="@+id/cards_remaining_left"
-        app:layout_constraintTop_toTopOf="parent"
-        android:textColor="@color/colorRed"/>
 
 </android.support.constraint.ConstraintLayout>
