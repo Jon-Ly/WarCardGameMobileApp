@@ -5,12 +5,20 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 
 import java.util.regex.Pattern;
 
@@ -26,6 +34,8 @@ public class LoginActivity extends AppCompatActivity{
     private ContentValues values;
     private Cursor cursor;
     private static int currentID;
+
+    private String username;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,8 +63,8 @@ public class LoginActivity extends AppCompatActivity{
                 EditText username_field = (EditText) findViewById(R.id.username_field);
                 EditText password_field = (EditText) findViewById(R.id.password_field);
 
-                String username = username_field.getText().toString();
-                String password = password_field.getText().toString();
+                final String username = username_field.getText().toString();
+                final String password = password_field.getText().toString();
 
                 if(registerCheckbox.isChecked()) {
                     //registering
@@ -117,12 +127,46 @@ public class LoginActivity extends AppCompatActivity{
                         }
                     }
 
-                    if(!successful && isIncorrectUsername)
+                    if(!successful && isIncorrectUsername) {
                         Toast.makeText(getBaseContext(), "Your username was not found. Try registering.", Toast.LENGTH_SHORT).show();
-                    else if(successful){
-                        Intent gameIntent = new Intent(LoginActivity.this, MainActivity.class);
-                        gameIntent.putExtra("USERNAME", username);
-                        startActivity(gameIntent);
+                    } else if(successful){
+                        String url = "http://webdev.cs.uwosh.edu/students/lyj47/labProcedures.php?getEverything=1";
+
+                        RequestQueue queue = Volley.newRequestQueue(getBaseContext());
+
+                        StringRequest string_request = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
+
+                            public void onResponse(String response) {
+                                String cleaned_response = "";
+                                for (int i = 0; i < response.length(); i++) {
+                                    if (response.charAt(i) != '[' && response.charAt(i) != ']' &&
+                                            response.charAt(i) != '"') {
+                                        if (response.charAt(i) == ',')
+                                            cleaned_response += "~";
+                                        else
+                                            cleaned_response += response.charAt(i);
+                                    }
+                                }
+
+                                String[] parts = cleaned_response.split("~");
+
+                                System.out.println(cleaned_response + " | " + parts[4] + " | " + parts[5]);
+
+                                if(!parts[4].equals("1") || !parts[5].equals("1")) {
+                                    Intent gameIntent = new Intent(LoginActivity.this, MainActivity.class);
+                                    gameIntent.putExtra("USERNAME", username);
+                                    startActivity(gameIntent);
+                                }else{
+                                    Toast.makeText(getBaseContext(), "There are two players already, please wait your turn", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+
+                        }, new Response.ErrorListener() {
+                            public void onErrorResponse(VolleyError er) {
+
+                            }
+                        });
+                        queue.add(string_request);
                     }
                 }
             }

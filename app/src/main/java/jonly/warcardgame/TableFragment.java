@@ -48,11 +48,11 @@ public class TableFragment extends Fragment {
 //        savedInstanceState.putInt("Card_Right_Drawable", card_right_drawable);
     }
 
-    public void setCardLeftDrawable(Card card){
+    public void setCardLeftDrawable(ImageView card){
         card_left = card;
     }
 
-    public void setCardRightDrawable(Card card){
+    public void setCardRightDrawable(ImageView card){
         card_right = card;
     }
 }

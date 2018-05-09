@@ -10,6 +10,13 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+
 import org.w3c.dom.Text;
 
 import java.util.Random;
@@ -20,6 +27,7 @@ import java.util.Random;
 
 public class MathFragment extends Fragment {
 
+    private String insert_math_url = "http://webdev.cs.uwosh.edu/students/lyj47/labProcedures.php?insertMath=";
     private TextView equation_view;
     private int answer;
     private int correct_counter;
@@ -31,7 +39,7 @@ public class MathFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState){
-        rand = new Random();
+        rand = new Random(56);
         equation = getNewEquation(); // generate the new math problem/answer
         correct_counter = 0;
         if(savedInstanceState != null) {
@@ -81,10 +89,30 @@ public class MathFragment extends Fragment {
                         answeredList.addView(add_solution, 0);
                     }
                     correct_answers += solution + "\n";
+                    correct_counter++;
                     equation = getNewEquation();
                     equation_view.setText(equation);
                 }
 
+                if(correct_counter >= 3){
+                    RequestQueue queue = Volley.newRequestQueue(getContext());
+
+                    TextView username_label_view = getView().findViewById(R.id.username_label);
+                    String username = username_label_view.getText().toString();
+
+                    StringRequest string_request = new StringRequest(Request.Method.GET, insert_math_url + username, new Response.Listener<String>() {
+                        public void onResponse(String response) {
+
+                        }
+
+                    }, new Response.ErrorListener() {
+                        public void onErrorResponse(VolleyError er) {
+
+                        }
+                    });
+
+                    queue.add(string_request);
+                }
                 userAnswer.setText("");
             }
         });

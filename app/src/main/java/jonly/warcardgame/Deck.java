@@ -26,5 +26,11 @@ public class Deck {
     public int size(){
         return current_hand.size();
     }
+    public Card get(int index){
+        return this.current_hand.get(index);
+    }
+    public void remove(int index){
+        this.current_hand.remove(index);
+    }
 
 }

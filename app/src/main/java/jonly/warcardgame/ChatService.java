@@ -40,20 +40,31 @@ public class ChatService extends IntentService {
                 }
             };
 
-            timer.schedule(task, 2000, 2000);
+            timer.schedule(task, 1250, 1250);
         }
     }
 
     private void getMessages() {
-        String url = "http://webdev.cs.uwosh.edu/students/lyj47/labProcedures.php?getMessage=1";
+        String url = "http://webdev.cs.uwosh.edu/students/lyj47/labProcedures.php?getEverything=1";
 
         queue = Volley.newRequestQueue(getBaseContext());
 
         StringRequest string_request = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
 
             public void onResponse(String response) {
+                String cleaned_response = "";
+                for (int i = 0; i < response.length(); i++) {
+                    if (response.charAt(i) != '[' && response.charAt(i) != ']' &&
+                            response.charAt(i) != '"') {
+                        if (response.charAt(i) == ',')
+                            cleaned_response += "~";
+                        else
+                            cleaned_response += response.charAt(i);
+                    }
+                }
+
                 Intent local = new Intent("chatIntent");
-                local.putExtra("NEW_MESSAGE", response);
+                local.putExtra("NEW_MESSAGE", cleaned_response);
                 LocalBroadcastManager.getInstance(getBaseContext()).
                         sendBroadcast(local);
             }

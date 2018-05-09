@@ -44,7 +44,7 @@
         app:layout_constraintEnd_toEndOf="parent" />
 
     <TextView
-        android:id="@+id/score_label"
+        android:id="@+id/username_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="16dp"
@@ -62,7 +62,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/score_label"
+        app:layout_constraintTop_toBottomOf="@+id/username_label"
         android:background="@color/colorBlack"/>
 
     <TextView
@@ -70,10 +70,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="35dp"
-        android:text="Score"
+        android:text="Waiting"
+        android:textColor="@color/colorTeal"
         app:layout_constraintStart_toStartOf="@+id/score_background"
-        app:layout_constraintTop_toTopOf="parent"
-        android:textColor="@color/colorTeal"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/score_right"
@@ -81,7 +81,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="35dp"
-        android:text="Score"
+        android:text="Waiting"
         android:textColor="@color/colorRed"
         app:layout_constraintEnd_toEndOf="@+id/score_background"
         app:layout_constraintStart_toEndOf="@+id/score_left"
