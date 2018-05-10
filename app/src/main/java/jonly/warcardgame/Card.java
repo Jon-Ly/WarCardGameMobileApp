@@ -17,12 +17,14 @@ public class Card extends AppCompatImageView{
     // (ACE) 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, (JACK) 11, (QUEEN) 12, (KING) 13
     private int value;
     private String label;
+    private int id;
 
-    public Card(Context context, int value, String label){
+    public Card(Context context, int value, String label, int id){
         super(context);
 
         this.value = value;
         this.label = label;
+        this.id = id;
     }
 
     public int getValue(){
@@ -31,5 +33,8 @@ public class Card extends AppCompatImageView{
 
     public String getLabel(){
         return this.label;
+    }
+    public int getId(){
+        return this.id;
     }
 }

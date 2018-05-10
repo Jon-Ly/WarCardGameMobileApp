@@ -9,6 +9,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -97,8 +98,10 @@ public class MathFragment extends Fragment {
                 if(correct_counter >= 3){
                     RequestQueue queue = Volley.newRequestQueue(getContext());
 
-                    TextView username_label_view = getView().findViewById(R.id.username_label);
+                    TextView username_label_view = (TextView) getView().findViewById(R.id.username_label);
                     String username = username_label_view.getText().toString();
+
+                    Toast.makeText(getContext(), username + ", you win!", Toast.LENGTH_SHORT).show();
 
                     StringRequest string_request = new StringRequest(Request.Method.GET, insert_math_url + username, new Response.Listener<String>() {
                         public void onResponse(String response) {
@@ -179,5 +182,9 @@ public class MathFragment extends Fragment {
         }
 
         return equation;
+    }
+
+    public void resetCounter(){
+        this.correct_counter = 0;
     }
 }

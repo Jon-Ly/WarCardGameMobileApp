@@ -37,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
     private final String GET_FIRST_PLAYER_URL = "http://webdev.cs.uwosh.edu/students/lyj47/labProcedures.php?isPlayerOne=1";
     private final String RESET_MESSAGE_URL = "http://webdev.cs.uwosh.edu/students/lyj47/labProcedures.php?resetMessage=1";
     private final String RESET_GAME_URL = "http://webdev.cs.uwosh.edu/students/lyj47/labProcedures.php?resetGame=1";
+    private final String RESET_CARDS_URL = "http://webdev.cs.uwosh.edu/students/lyj47/labProcedures.php?resetCards=1";
     private String insert_message_url = "http://webdev.cs.uwosh.edu/students/lyj47/labProcedures.php?message=";
 
     private int[] card_drawable_ids;
@@ -49,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean can_start;
     private boolean game_started;
     private boolean has_selected_card;
+    private boolean is_checking;
 
     private String chat_history;
     private String username;
@@ -77,6 +79,7 @@ public class MainActivity extends AppCompatActivity {
         current_turn = false;
         game_started = false;
         has_selected_card = false;
+        is_checking = false;
 
         if (savedInstanceState == null) {
             //set up who goes first
@@ -91,7 +94,8 @@ public class MainActivity extends AppCompatActivity {
                     String value = j == 10 ? "t" : j == 11 ? "j" :
                             j == 12 ? "q" : j == 13 ? "k" : j + "";
 
-                    Card card = new Card(getBaseContext(), j, suit[i] + value);
+                    Card card = new Card(getBaseContext(), j, suit[i] + value, getResources()
+                            .getIdentifier(suit[i] + value, "drawable", getPackageName()));
                     card.setImageResource(getResources()
                             .getIdentifier(suit[i] + value, "drawable", getPackageName()));
 
@@ -224,6 +228,19 @@ public class MainActivity extends AppCompatActivity {
                 if (Integer.parseInt(parts[4].trim()) == 1 && Integer.parseInt(parts[5].trim()) == 1
                         && !can_start) {
                     can_start = true;
+
+                    RequestQueue queue = Volley.newRequestQueue(getBaseContext());
+
+                    StringRequest string_request = new StringRequest(Request.Method.GET, RESET_GAME_URL, new Response.Listener<String>() {
+                        public void onResponse(String response) {
+                            // do nothing
+                        }
+                    }, new Response.ErrorListener() {
+                        public void onErrorResponse(VolleyError er) {
+                            //do nothing
+                        }
+                    });
+                    queue.add(string_request);
                 }
 
                 if (can_start && !game_started) {
@@ -237,28 +254,28 @@ public class MainActivity extends AppCompatActivity {
                         score_right = (TextView) findViewById(R.id.score_right);
                         score_right.setText(player2.size() + "");
                         card_drawable_ids[0] = randomCard();
-                        cards[0].setImageResource(getResources().getIdentifier(player1.get(card_drawable_ids[0]).getLabel(), "drawable", getPackageName()));
-                        player1.remove(card_drawable_ids[0]);
+                        cards[0].setImageResource(card_drawable_ids[0]);
+                        removeCard(card_drawable_ids[0]);
                         card_drawable_ids[1] = randomCard();
-                        cards[1].setImageResource(getResources().getIdentifier(player1.get(card_drawable_ids[1]).getLabel(), "drawable", getPackageName()));
-                        player1.remove(card_drawable_ids[0]);
+                        cards[1].setImageResource(card_drawable_ids[1]);
+                        removeCard(card_drawable_ids[0]);
                         card_drawable_ids[2] = randomCard();
-                        cards[2].setImageResource(getResources().getIdentifier(player1.get(card_drawable_ids[2]).getLabel(), "drawable", getPackageName()));
-                        player1.remove(card_drawable_ids[0]);
+                        cards[2].setImageResource(card_drawable_ids[2]);
+                        removeCard(card_drawable_ids[0]);
                     } else {
                         score_left = (TextView) findViewById(R.id.score_left);
                         score_left.setText(player1.size() + "");
                         card_drawable_ids[0] = randomCard();
-                        cards[0].setImageResource(getResources().getIdentifier(player2.get(card_drawable_ids[0]).getLabel(), "drawable", getPackageName()));
-                        player2.remove(card_drawable_ids[0]);
+                        cards[0].setImageResource(card_drawable_ids[0]);
+                        removeCard(card_drawable_ids[0]);
 
                         card_drawable_ids[1] = randomCard();
-                        cards[1].setImageResource(getResources().getIdentifier(player2.get(card_drawable_ids[1]).getLabel(), "drawable", getPackageName()));
-                        player2.remove(card_drawable_ids[1]);
+                        cards[1].setImageResource(card_drawable_ids[1]);
+                        removeCard(card_drawable_ids[1]);
 
                         card_drawable_ids[2] = randomCard();
-                        cards[2].setImageResource(getResources().getIdentifier(player2.get(card_drawable_ids[2]).getLabel(), "drawable", getPackageName()));
-                        player2.remove(card_drawable_ids[2]);
+                        cards[2].setImageResource(card_drawable_ids[2]);
+                        removeCard(card_drawable_ids[2]);
                     }
                     game_started = true;
                 }
@@ -271,7 +288,17 @@ public class MainActivity extends AppCompatActivity {
 
                     boolean check_cards_played = player1_card.length() > 1 && player2_card.length() > 1;
 
-                    if (check_cards_played) { //determine who won or tie
+                    if (check_cards_played && !is_checking) { //determine who won or tie
+                        is_checking = true;
+                        if(is_first_player){
+                            ((ImageView) findViewById(R.id.played_card_right)).setImageResource(
+                                    getResources().getIdentifier(player2_card.substring(0, 2), "drawable", getPackageName())
+                            );
+                        }else{
+                            ((ImageView) findViewById(R.id.played_card_right)).setImageResource(
+                                    getResources().getIdentifier(player1_card.substring(0, 2), "drawable", getPackageName())
+                            );
+                        }
                         checkTableState(player1_card, player2_card);
                     }
 
@@ -313,6 +340,14 @@ public class MainActivity extends AppCompatActivity {
 
                         score_left.setText(player1.size());
                         score_right.setText(player2.size());
+
+                        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+                        ft.hide(mf);
+                        ft.show(tf);
+                        is_tie_breaker = true;
+                        ft.commit();
+
+                        mf.resetCounter();
                     }
 
                     if (player1.size() >= 52) {
@@ -394,7 +429,7 @@ public class MainActivity extends AppCompatActivity {
                 queue.add(string_request);
                 t.cancel(); // also just top the timer thread, otherwise, you may receive a crash report
             }
-        }, 2000); // after 2 second (or 2000 miliseconds), the task will be active.
+        }, 2000); // after 2 second (or 2000 milliseconds), the task will be active.
     }
 
     @Override
@@ -441,8 +476,8 @@ public class MainActivity extends AppCompatActivity {
 
     public void checkTableState(String player1_card, String player2_card) {
 
-        int player1_card_value = Integer.parseInt(player1_card.substring(1));
-        int player2_card_value = Integer.parseInt(player2_card.substring(1));
+        int player1_card_value = Integer.parseInt(player1_card.substring(2));
+        int player2_card_value = Integer.parseInt(player2_card.substring(2));
 
         String label1 = player1_card.charAt(0) + "" + player1_card.charAt(1);
         String label2 = player2_card.charAt(0) + "" + player2_card.charAt(1);
@@ -452,40 +487,99 @@ public class MainActivity extends AppCompatActivity {
                 if (player2.get(i).getLabel().equals(label2)) {
                     player1.add(player2.get(i));
                     player2.remove(i);
+                    break;
                 }
             }
-            has_selected_card = false;
+
+            final Timer t = new Timer();
+            TimerTask task = new TimerTask(){
+                @Override
+                public void run(){
+                    RequestQueue queue = Volley.newRequestQueue(getBaseContext());
+
+                    StringRequest string_request = new StringRequest(Request.Method.GET, RESET_CARDS_URL, new Response.Listener<String>() {
+                        public void onResponse(String response) {
+                            // do nothing
+                        }
+                    }, new Response.ErrorListener() {
+                        public void onErrorResponse(VolleyError er) {
+                            //do nothing
+                        }
+                    });
+                    queue.add(string_request);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            ((TextView)findViewById(R.id.score_left)).setText(player1.size()+"");
+                            ((TextView)findViewById(R.id.score_right)).setText(player2.size()+"");
+                            has_selected_card = false;
+                            ((ImageView) findViewById(R.id.played_card_right)).setImageResource(android.R.color.transparent);
+                            ((ImageView) findViewById(R.id.played_card_left)).setImageResource(android.R.color.transparent);
+                            t.cancel();
+                            is_checking = false;
+                        }
+                    });
+                }
+            };
+
+            t.schedule(task, 2000, 2000);
+
         } else if (player1_card_value < player2_card_value) { //p2 wins
             for (int i = 0; i < player1.size(); i++) {
                 if (player1.get(i).getLabel().equals(label1)) {
                     player2.add(player1.get(i));
                     player1.remove(i);
+                    break;
                 }
             }
-            has_selected_card = false;
+            final Timer t = new Timer();
+            TimerTask task = new TimerTask(){
+                @Override
+                public void run(){
+                    RequestQueue queue = Volley.newRequestQueue(getBaseContext());
+
+                    StringRequest string_request = new StringRequest(Request.Method.GET, RESET_CARDS_URL, new Response.Listener<String>() {
+                        public void onResponse(String response) {
+                            // do nothing
+                        }
+                    }, new Response.ErrorListener() {
+                        public void onErrorResponse(VolleyError er) {
+                            //do nothing
+                        }
+                    });
+                    queue.add(string_request);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            ((TextView)findViewById(R.id.score_left)).setText(player1.size()+"");
+                            ((TextView)findViewById(R.id.score_right)).setText(player2.size()+"");
+                            has_selected_card = false;
+                            ((ImageView) findViewById(R.id.played_card_right)).setImageResource(android.R.color.transparent);
+                            ((ImageView) findViewById(R.id.played_card_left)).setImageResource(android.R.color.transparent);
+                            t.cancel();
+                            is_checking = false;
+                        }
+                    });
+                }
+            };
+
+            t.schedule(task, 2000, 2000);
         } else { //tie
-            AlertDialog.Builder builder = new AlertDialog.Builder(getBaseContext());
-            builder.setTitle("Auto-closing Dialog");
-            builder.setMessage("After 2 second, the math tie-breaker will start!");
-            builder.setCancelable(true);
-
-            final AlertDialog dlg = builder.create();
-
-            dlg.show();
+            Toast.makeText(getBaseContext(), "MATH CHALLENGE INCOMING!!", Toast.LENGTH_SHORT).show();
 
             final Timer t = new Timer();
-            t.schedule(new TimerTask() {
+            TimerTask task = new TimerTask() {
                 public void run() {
-                    dlg.dismiss(); // when the task active then close the dialog
                     FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
                     ft.hide(tf);
                     ft.show(mf);
                     is_tie_breaker = true;
+                    ft.commit();
                     t.cancel(); // also just top the timer thread, otherwise, you may receive a crash report
                 }
-            }, 2000); // after 2 second (or 2000 miliseconds), the task will be active.
+            };
+            t.schedule(task, 2000, 2000); // after 2 second (or 2000 miliseconds), the task will be active.
         }
-
     }
 
     public void selectCard(View view) {
@@ -504,20 +598,53 @@ public class MainActivity extends AppCompatActivity {
 
             selected_card = index;
 
+            String card_label_value = "";
+
             if (view.getBackground() == null) {
                 view.setBackgroundResource(R.drawable.image_border);
             } else {
-                tf.setCardLeftDrawable(cards[index]);
+                tf.setCardLeftDrawable(card_drawable_ids[index]);
+                card_label_value = getCardLabelValue(card_drawable_ids[index]);
                 selected_card = -1;
                 card_drawable_ids[index] = randomCard();
                 if(is_first_player) {
-                    ((ImageView) view).setImageResource(
-                            getResources().getIdentifier(player1.get(card_drawable_ids[index]).getLabel(), "drawable", getPackageName()));
-                    player1.remove(card_drawable_ids[index]);
+                    ((ImageView) view).setImageResource(card_drawable_ids[index]);
+                    removeCard(card_drawable_ids[index]);
+                    String insert_player1_card_url = "http://webdev.cs.uwosh.edu/students/lyj47/labProcedures.php?insertPlayerOneCard=" + card_label_value;
+
+                    RequestQueue queue = Volley.newRequestQueue(getBaseContext());
+
+                    StringRequest string_request = new StringRequest(Request.Method.GET, insert_player1_card_url, new Response.Listener<String>() {
+                        public void onResponse(String response) {
+
+                        }
+
+                    }, new Response.ErrorListener() {
+                        public void onErrorResponse(VolleyError er) {
+
+                        }
+                    });
+
+                    queue.add(string_request);
                 }else{
-                    ((ImageView) view).setImageResource(
-                            getResources().getIdentifier(player2.get(card_drawable_ids[index]).getLabel(), "drawable", getPackageName()));
-                    player2.remove(card_drawable_ids[index]);
+                    String insert_player2_card_url = "http://webdev.cs.uwosh.edu/students/lyj47/labProcedures.php?insertPlayerTwoCard=" + card_label_value;
+                    ((ImageView) view).setImageResource(card_drawable_ids[index]);
+                    removeCard(card_drawable_ids[index]);
+
+                    RequestQueue queue = Volley.newRequestQueue(getBaseContext());
+
+                    StringRequest string_request = new StringRequest(Request.Method.GET, insert_player2_card_url, new Response.Listener<String>() {
+                        public void onResponse(String response) {
+
+                        }
+
+                    }, new Response.ErrorListener() {
+                        public void onErrorResponse(VolleyError er) {
+
+                        }
+                    });
+
+                    queue.add(string_request);
                 }
                 view.setBackground(null);
 
@@ -540,7 +667,6 @@ public class MainActivity extends AppCompatActivity {
                 public void onResponse(String response) {
 
                 }
-
             }, new Response.ErrorListener() {
                 public void onErrorResponse(VolleyError er) {
 
@@ -576,11 +702,38 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public String getCardLabelValue(int id){
+        for(int i = 0; i < card_pool.size(); i++){
+            if(id == card_pool.get(i).getId())
+                return card_pool.get(i).getLabel() + card_pool.get(i).getValue();
+        }
+
+        return "";
+    }
+
     public int randomCard() {
         if(is_first_player) {
-            return rand.nextInt(player1.size());
+            return player1.get(rand.nextInt(player1.size())).getId();
         }else{
-            return rand.nextInt(player2.size());
+            return player2.get(rand.nextInt(player2.size())).getId();
+        }
+    }
+
+    public void removeCard(int id){
+        if(is_first_player){
+            for(int i = 0; i < player1.size(); i++){
+                if(id == player1.get(i).getId()){
+                    player1.remove(i);
+                    break;
+                }
+            }
+        }else{
+            for(int i = 0; i < player2.size(); i++){
+                if(id == player2.get(i).getId()){
+                    player2.remove(i);
+                    break;
+                }
+            }
         }
     }
 }
